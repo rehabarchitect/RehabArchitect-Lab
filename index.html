@@ -1,0 +1,1533 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RehabArchitect — Clinical Knowledge Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+/* ═══════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --bg:        #F7F5F2;
+  --bg2:       #EFECEA;
+  --bg3:       #E5E2DE;
+  --surface:   #FFFFFF;
+  --border:    rgba(0,0,0,0.08);
+  --text:      #1A1714;
+  --text2:     #5C5751;
+  --text3:     #9C9590;
+  --accent:    #2D5A8E;
+  --accent2:   #1A3D61;
+  --gold:      #B8892A;
+  --gold2:     #D4A843;
+  --red:       #8E2D2D;
+  --green:     #2D6B4A;
+  --serif:     'DM Serif Display', Georgia, serif;
+  --sans:      'DM Sans', system-ui, sans-serif;
+  --mono:      'JetBrains Mono', monospace;
+  --radius:    6px;
+  --shadow:    0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06);
+  --trans:     0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg:      #0F0E0C;
+  --bg2:     #171613;
+  --bg3:     #201E1B;
+  --surface: #1C1A17;
+  --border:  rgba(255,255,255,0.07);
+  --text:    #EDE9E3;
+  --text2:   #9C9590;
+  --text3:   #5C5751;
+  --accent:  #5B8EC4;
+  --accent2: #7AAAD6;
+  --gold:    #D4A843;
+  --gold2:   #E8C060;
+  --shadow:    0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background var(--trans), color var(--trans);
+  overflow-x: hidden;
+}
+
+a { color: var(--accent); text-decoration: none; transition: color var(--trans); }
+a:hover { color: var(--accent2); }
+img { max-width: 100%; display: block; }
+
+/* ═══════════════════════════════════════════
+   PROGRESS BAR
+═══════════════════════════════════════════ */
+#progress-bar {
+  position: fixed; top: 0; left: 0; z-index: 1000;
+  height: 2px; width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+  transition: width 0.1s linear;
+}
+
+/* ═══════════════════════════════════════════
+   TOP NAV
+═══════════════════════════════════════════ */
+#topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(247,245,242,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--trans), border-color var(--trans);
+}
+
+[data-theme="dark"] #topnav {
+  background: rgba(15,14,12,0.92);
+}
+
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--serif); font-size: 17px; color: var(--text);
+  text-decoration: none;
+}
+
+.nav-brand-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gold);
+}
+
+.nav-links {
+  display: flex; align-items: center; gap: 6px;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px; font-weight: 500;
+  color: var(--text2); padding: 6px 12px; border-radius: var(--radius);
+  transition: all var(--trans);
+}
+
+.nav-links a:hover, .nav-links a.active {
+  color: var(--text); background: var(--bg3);
+}
+
+.nav-right { display: flex; align-items: center; gap: 8px; }
+
+/* Search bar in nav */
+.nav-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 5px 14px;
+  transition: all var(--trans);
+}
+
+.nav-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(45,90,142,0.1);
+}
+
+.nav-search input {
+  border: none; background: none; outline: none;
+  font-family: var(--sans); font-size: 13px;
+  color: var(--text); width: 160px;
+}
+
+.nav-search input::placeholder { color: var(--text3); }
+
+.nav-search svg { color: var(--text3); flex-shrink: 0; }
+
+/* Theme toggle */
+.theme-toggle {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text2); transition: all var(--trans);
+}
+
+.theme-toggle:hover { background: var(--bg3); color: var(--text); }
+
+/* Mobile menu btn */
+.mobile-menu-btn {
+  display: none; width: 32px; height: 32px;
+  border: none; background: none; cursor: pointer;
+  color: var(--text); flex-direction: column;
+  align-items: center; justify-content: center; gap: 5px;
+}
+
+.mobile-menu-btn span {
+  display: block; width: 20px; height: 1.5px;
+  background: currentColor; transition: all var(--trans);
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT WRAPPER
+═══════════════════════════════════════════ */
+#app {
+  padding-top: 56px;
+  min-height: 100vh;
+}
+
+/* ═══════════════════════════════════════════
+   VIEWS (pages)
+═══════════════════════════════════════════ */
+.view { display: none; animation: viewIn 0.3s ease; }
+.view.active { display: block; }
+
+@keyframes viewIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════
+   HOME — HERO
+═══════════════════════════════════════════ */
+.hero {
+  padding: 80px 32px 64px;
+  max-width: 1100px; margin: 0 auto;
+  display: grid; grid-template-columns: 1fr 340px; gap: 80px;
+  align-items: center;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 3px;
+  color: var(--gold); text-transform: uppercase;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 10px;
+}
+
+.hero-eyebrow::before {
+  content: ''; display: block; width: 24px; height: 1px; background: var(--gold);
+}
+
+.hero-title {
+  font-family: var(--serif); font-size: clamp(36px, 4vw, 54px);
+  line-height: 1.1; color: var(--text); margin-bottom: 24px;
+}
+
+.hero-title em { font-style: italic; color: var(--accent); }
+
+.hero-body {
+  font-size: 16px; line-height: 1.8; color: var(--text2);
+  max-width: 540px; margin-bottom: 36px;
+}
+
+.hero-tags {
+  display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 40px;
+}
+
+.hero-tag {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 5px 10px;
+  border: 1px solid var(--border); border-radius: 3px; color: var(--text3);
+}
+
+.hero-cta {
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px; border-radius: var(--radius);
+  font-family: var(--sans); font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none; transition: all var(--trans);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: var(--accent); color: white;
+}
+.btn-primary:hover {
+  background: var(--accent2); color: white; transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(45,90,142,0.3);
+}
+
+.btn-secondary {
+  background: var(--bg2); color: var(--text);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover {
+  background: var(--bg3); color: var(--text); transform: translateY(-1px);
+}
+
+/* Hero visual */
+.hero-visual {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+
+.hero-visual-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase; margin-bottom: 20px;
+}
+
+.stat-row {
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+.stat-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 16px; background: var(--bg);
+  border-radius: var(--radius); border: 1px solid var(--border);
+}
+
+.stat-icon {
+  width: 32px; height: 32px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+
+.stat-num {
+  font-family: var(--serif); font-size: 22px; color: var(--text);
+  line-height: 1;
+}
+
+.stat-desc {
+  font-size: 11px; color: var(--text3); margin-top: 2px;
+  font-family: var(--mono); letter-spacing: 0.5px;
+}
+
+.hero-disclaimer {
+  margin-top: 20px; padding: 12px 16px;
+  background: rgba(184,137,42,0.08); border: 1px solid rgba(184,137,42,0.2);
+  border-radius: var(--radius); font-size: 11px; color: var(--gold);
+  font-family: var(--mono); line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════════
+   HOME — CATEGORIES
+═══════════════════════════════════════════ */
+.section-wrap {
+  max-width: 1100px; margin: 0 auto; padding: 0 32px 64px;
+}
+
+.section-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-family: var(--serif); font-size: 24px; color: var(--text);
+}
+
+.section-link {
+  font-size: 12px; color: var(--text3);
+  font-family: var(--mono); letter-spacing: 1px;
+}
+
+.section-link:hover { color: var(--accent); }
+
+.category-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+}
+
+.cat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 18px;
+  cursor: pointer; transition: all var(--trans);
+}
+
+.cat-card:hover {
+  border-color: var(--accent); transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+
+.cat-icon { font-size: 22px; margin-bottom: 12px; }
+
+.cat-name {
+  font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px;
+}
+
+.cat-count {
+  font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1px;
+}
+
+/* ═══════════════════════════════════════════
+   CASE CARDS
+═══════════════════════════════════════════ */
+.case-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+}
+
+.case-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  cursor: pointer; transition: all var(--trans);
+  display: flex; flex-direction: column;
+}
+
+.case-card:hover {
+  border-color: rgba(45,90,142,0.3);
+  transform: translateY(-2px); box-shadow: var(--shadow);
+}
+
+.case-card-top {
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--gold));
+}
+
+.case-card-body { padding: 22px; flex: 1; display: flex; flex-direction: column; }
+
+.case-meta {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;
+}
+
+.tag {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px;
+  text-transform: uppercase; padding: 3px 8px;
+  border-radius: 3px; border: 1px solid var(--border); color: var(--text3);
+}
+
+.tag.stroke { border-color: rgba(142,45,45,0.3); color: var(--red); background: rgba(142,45,45,0.06); }
+.tag.spasticity { border-color: rgba(45,90,142,0.3); color: var(--accent); background: rgba(45,90,142,0.06); }
+.tag.gait { border-color: rgba(45,107,74,0.3); color: var(--green); background: rgba(45,107,74,0.06); }
+.tag.sci { border-color: rgba(184,137,42,0.3); color: var(--gold); background: rgba(184,137,42,0.06); }
+.tag.tbi { border-color: rgba(100,60,140,0.3); color: #6E4E8E; background: rgba(100,60,140,0.06); }
+.tag.robotic { border-color: rgba(45,90,142,0.3); color: var(--accent); background: rgba(45,90,142,0.06); }
+
+.case-date {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  margin-left: auto;
+}
+
+.case-title {
+  font-family: var(--serif); font-size: 18px; line-height: 1.3;
+  color: var(--text); margin-bottom: 10px; flex: 1;
+}
+
+.case-excerpt {
+  font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 16px;
+}
+
+.case-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 22px; border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.read-time {
+  font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1px;
+}
+
+.read-arrow { color: var(--accent); font-size: 16px; }
+
+/* ═══════════════════════════════════════════
+   ARCHIVE VIEW
+═══════════════════════════════════════════ */
+.archive-layout {
+  max-width: 1100px; margin: 0 auto; padding: 48px 32px;
+  display: grid; grid-template-columns: 220px 1fr; gap: 48px;
+}
+
+/* Sidebar */
+.archive-sidebar { position: sticky; top: 72px; align-self: start; }
+
+.sidebar-section { margin-bottom: 32px; }
+
+.sidebar-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 12px;
+}
+
+.sidebar-filter-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 8px 12px; margin-bottom: 4px;
+  border-radius: var(--radius); border: none; background: none;
+  cursor: pointer; font-family: var(--sans); font-size: 13px;
+  color: var(--text2); transition: all var(--trans); text-align: left;
+}
+
+.sidebar-filter-btn:hover { background: var(--bg2); color: var(--text); }
+.sidebar-filter-btn.active { background: var(--accent); color: white; }
+
+.filter-count {
+  font-family: var(--mono); font-size: 10px;
+  background: var(--bg3); border-radius: 10px; padding: 1px 7px;
+}
+
+.sidebar-filter-btn.active .filter-count {
+  background: rgba(255,255,255,0.2); color: white;
+}
+
+.tag-cloud { display: flex; flex-wrap: wrap; gap: 6px; }
+
+.tag-btn {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 1px;
+  text-transform: uppercase; padding: 4px 9px;
+  border-radius: 3px; border: 1px solid var(--border);
+  background: none; cursor: pointer; color: var(--text3);
+  transition: all var(--trans);
+}
+
+.tag-btn:hover { border-color: var(--accent); color: var(--accent); }
+.tag-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+/* Archive main */
+.archive-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border);
+}
+
+.archive-count {
+  font-family: var(--mono); font-size: 12px; color: var(--text3); letter-spacing: 1px;
+}
+
+.archive-sort {
+  font-family: var(--mono); font-size: 11px; color: var(--text2);
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 5px 10px; cursor: pointer;
+  outline: none;
+}
+
+.case-list { display: flex; flex-direction: column; gap: 12px; }
+
+.case-list-item {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px;
+  cursor: pointer; transition: all var(--trans);
+  display: flex; gap: 20px; align-items: flex-start;
+}
+
+.case-list-item:hover {
+  border-color: rgba(45,90,142,0.3); box-shadow: var(--shadow);
+}
+
+.case-list-accent {
+  width: 3px; flex-shrink: 0; border-radius: 2px; align-self: stretch;
+  background: linear-gradient(180deg, var(--accent), var(--gold));
+  min-height: 60px;
+}
+
+.case-list-content { flex: 1; }
+.case-list-title {
+  font-family: var(--serif); font-size: 17px; color: var(--text);
+  margin-bottom: 6px; line-height: 1.3;
+}
+
+.case-list-excerpt { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 10px; }
+
+.case-list-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════════
+   CASE READER VIEW
+═══════════════════════════════════════════ */
+.reader-layout {
+  max-width: 1100px; margin: 0 auto; padding: 48px 32px;
+  display: grid; grid-template-columns: 1fr 240px; gap: 64px; align-items: start;
+}
+
+/* TOC sidebar */
+.toc-sidebar {
+  position: sticky; top: 72px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+}
+
+.toc-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 14px;
+}
+
+.toc-list { list-style: none; }
+
+.toc-item {
+  padding: 5px 0; border-left: 2px solid var(--border);
+  padding-left: 12px; font-size: 12px; color: var(--text2);
+  cursor: pointer; transition: all var(--trans); margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.toc-item:hover { border-color: var(--accent); color: var(--text); }
+.toc-item.active { border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.toc-item.toc-h3 { padding-left: 22px; font-size: 11px; }
+
+.toc-progress {
+  margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 1px;
+}
+
+.toc-progress-bar {
+  height: 2px; background: var(--bg3); border-radius: 2px; margin-top: 8px;
+}
+
+.toc-progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold));
+  border-radius: 2px; transition: width 0.2s;
+}
+
+/* Article content */
+.article-header { margin-bottom: 48px; }
+
+.article-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  letter-spacing: 1px; margin-bottom: 24px; cursor: pointer;
+  transition: color var(--trans);
+}
+
+.article-back:hover { color: var(--accent); }
+
+.article-meta { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+
+.article-title {
+  font-family: var(--serif); font-size: clamp(28px, 3.5vw, 42px);
+  line-height: 1.15; color: var(--text); margin-bottom: 20px;
+}
+
+.article-desc {
+  font-size: 16px; color: var(--text2); line-height: 1.75; margin-bottom: 28px;
+  border-left: 3px solid var(--accent); padding-left: 20px;
+}
+
+.article-divider {
+  height: 1px; background: var(--border); margin-bottom: 40px;
+}
+
+/* Collapsible section */
+.collapsible-section {
+  border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; margin-bottom: 12px;
+}
+
+.collapsible-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px; cursor: pointer; background: var(--bg);
+  transition: background var(--trans); user-select: none;
+}
+
+.collapsible-header:hover { background: var(--bg2); }
+
+.collapsible-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 14px; font-weight: 500; color: var(--text);
+}
+
+.collapsible-icon {
+  width: 20px; height: 20px; border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; flex-shrink: 0;
+}
+
+.collapsible-chevron {
+  color: var(--text3); transition: transform var(--trans); font-size: 12px;
+}
+
+.collapsible-section.open .collapsible-chevron { transform: rotate(180deg); }
+
+.collapsible-body {
+  display: none; padding: 24px; border-top: 1px solid var(--border);
+}
+
+.collapsible-section.open .collapsible-body { display: block; }
+
+/* Markdown rendered */
+.md-body { line-height: 1.85; }
+
+.md-body h1 {
+  font-family: var(--serif); font-size: 32px; color: var(--text);
+  margin: 48px 0 20px; line-height: 1.2;
+}
+
+.md-body h2 {
+  font-family: var(--serif); font-size: 24px; color: var(--text);
+  margin: 40px 0 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.md-body h3 {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--gold); margin: 32px 0 12px;
+}
+
+.md-body p {
+  font-size: 15px; color: var(--text2); margin-bottom: 18px; line-height: 1.85;
+}
+
+.md-body ul, .md-body ol {
+  padding-left: 20px; margin-bottom: 20px;
+}
+
+.md-body li {
+  font-size: 14px; color: var(--text2); margin-bottom: 6px; line-height: 1.7;
+}
+
+.md-body blockquote {
+  border-left: 3px solid var(--gold); padding: 14px 20px;
+  margin: 24px 0; background: rgba(184,137,42,0.06);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-style: italic; color: var(--text2);
+}
+
+.md-body code {
+  font-family: var(--mono); font-size: 12px;
+  background: var(--bg2); padding: 2px 6px; border-radius: 3px;
+  color: var(--accent); border: 1px solid var(--border);
+}
+
+.md-body pre {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; overflow-x: auto; margin: 20px 0;
+}
+
+.md-body pre code { background: none; border: none; padding: 0; color: var(--text); }
+
+.md-body table {
+  width: 100%; border-collapse: collapse; margin: 24px 0;
+  font-size: 13px;
+}
+
+.md-body th {
+  background: var(--bg2); padding: 10px 14px;
+  text-align: left; font-weight: 500;
+  border-bottom: 2px solid var(--border);
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2);
+}
+
+.md-body td {
+  padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text2);
+  font-size: 13px;
+}
+
+.md-body tr:hover td { background: var(--bg); }
+
+.md-body img {
+  border-radius: var(--radius); cursor: zoom-in; max-width: 100%;
+  border: 1px solid var(--border); margin: 16px 0;
+}
+
+.md-body strong { color: var(--text); font-weight: 600; }
+.md-body hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+.md-body a { color: var(--accent); border-bottom: 1px solid rgba(45,90,142,0.2); }
+.md-body a:hover { border-color: var(--accent); }
+
+/* ═══════════════════════════════════════════
+   DISCLAIMER BANNER
+═══════════════════════════════════════════ */
+.disclaimer-banner {
+  background: rgba(184,137,42,0.07); border: 1px solid rgba(184,137,42,0.2);
+  border-radius: var(--radius); padding: 14px 18px; margin-bottom: 28px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+
+.disclaimer-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+.disclaimer-text {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 0.3px;
+  color: var(--gold); line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════
+   IMAGE MODAL
+═══════════════════════════════════════════ */
+.img-modal {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,0.85); display: none;
+  align-items: center; justify-content: center;
+  padding: 40px; cursor: zoom-out;
+}
+
+.img-modal.open { display: flex; animation: viewIn 0.2s ease; }
+
+.img-modal img {
+  max-width: 90vw; max-height: 85vh;
+  border-radius: var(--radius); object-fit: contain;
+  box-shadow: var(--shadow-lg);
+}
+
+/* ═══════════════════════════════════════════
+   LOADING SKELETON
+═══════════════════════════════════════════ */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg2) 25%, var(--bg3) 50%, var(--bg2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-text { height: 14px; margin-bottom: 8px; }
+.skeleton-title { height: 24px; margin-bottom: 12px; width: 70%; }
+.skeleton-card {
+  height: 200px; border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════
+   EMPTY STATE
+═══════════════════════════════════════════ */
+.empty-state {
+  text-align: center; padding: 80px 32px;
+  color: var(--text3); font-family: var(--mono); font-size: 12px; letter-spacing: 1px;
+}
+
+.empty-state-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.4; }
+
+/* ═══════════════════════════════════════════
+   MOBILE SIDEBAR OVERLAY
+═══════════════════════════════════════════ */
+.mobile-overlay {
+  display: none; position: fixed; inset: 0; z-index: 800;
+  background: rgba(0,0,0,0.5);
+}
+
+.mobile-sidebar {
+  position: fixed; top: 0; left: -280px; bottom: 0;
+  width: 280px; z-index: 850;
+  background: var(--surface); border-right: 1px solid var(--border);
+  padding: 80px 24px 24px;
+  transition: left 0.3s ease;
+  overflow-y: auto;
+}
+
+.mobile-sidebar.open { left: 0; }
+.mobile-overlay.open { display: block; }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media (max-width: 960px) {
+  .hero { grid-template-columns: 1fr; gap: 40px; padding: 48px 20px 40px; }
+  .hero-visual { max-width: 400px; }
+  .category-grid { grid-template-columns: repeat(2, 1fr); }
+  .case-grid { grid-template-columns: 1fr; }
+  .archive-layout { grid-template-columns: 1fr; }
+  .archive-sidebar { display: none; }
+  .reader-layout { grid-template-columns: 1fr; }
+  .toc-sidebar { display: none; }
+  .nav-links { display: none; }
+  .nav-search { display: none; }
+  .mobile-menu-btn { display: flex; }
+  .section-wrap { padding: 0 20px 48px; }
+}
+
+@media (max-width: 600px) {
+  .category-grid { grid-template-columns: 1fr 1fr; }
+  #topnav { padding: 0 16px; }
+  .hero { padding: 40px 16px 32px; }
+  .reader-layout { padding: 32px 16px; }
+  .archive-layout { padding: 32px 16px; }
+  .section-wrap { padding: 0 16px 40px; }
+}
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 32px;
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 20px; flex-wrap: wrap;
+}
+
+.footer-brand {
+  font-family: var(--serif); font-size: 16px; color: var(--text);
+}
+
+.footer-note {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; color: var(--text3); text-align: center; line-height: 1.7;
+}
+
+.footer-link {
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+}
+
+.footer-link:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- ── Progress Bar ── -->
+<div id="progress-bar"></div>
+
+<!-- ── Top Navigation ── -->
+<nav id="topnav">
+  <a class="nav-brand" href="#" onclick="navigate('home')">
+    <div class="nav-brand-dot"></div>
+    RehabArchitect
+  </a>
+
+  <ul class="nav-links">
+    <li><a href="#" class="active" onclick="navigate('home')">Home</a></li>
+    <li><a href="#" onclick="navigate('archive')">Case Archive</a></li>
+    <li><a href="#" onclick="navigate('home'); scrollToAbout()">About</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <div class="nav-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" id="global-search" placeholder="Search cases..." oninput="handleSearch(this.value)">
+    </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+      <svg id="theme-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
+      </svg>
+    </button>
+
+    <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- ── Mobile Sidebar ── -->
+<div class="mobile-overlay" id="mobile-overlay" onclick="closeMobileMenu()"></div>
+<div class="mobile-sidebar" id="mobile-sidebar">
+  <ul style="list-style:none;">
+    <li style="margin-bottom:8px"><a href="#" onclick="navigate('home');closeMobileMenu()" style="font-size:15px;color:var(--text)">Home</a></li>
+    <li style="margin-bottom:8px"><a href="#" onclick="navigate('archive');closeMobileMenu()" style="font-size:15px;color:var(--text)">Case Archive</a></li>
+  </ul>
+  <div style="margin-top:24px">
+    <input type="text" placeholder="Search cases..." oninput="handleSearch(this.value)"
+      style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;outline:none;">
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     APP
+══════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ── HOME VIEW ── -->
+  <div class="view active" id="view-home">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-left">
+        <div class="hero-eyebrow">Clinical Knowledge Platform</div>
+        <h1 class="hero-title">
+          Neurorehabilitation<br>
+          <em>Reasoning & Reflection</em>
+        </h1>
+        <p class="hero-body">
+          Anonymous clinical case sharing, rehabilitation reasoning, and evidence-informed insights from daily practice in neurological physiotherapy.
+        </p>
+        <div class="hero-tags">
+          <span class="hero-tag">Neurorehabilitation</span>
+          <span class="hero-tag">Gait Analysis</span>
+          <span class="hero-tag">Spasticity</span>
+          <span class="hero-tag">Robotic Rehab</span>
+          <span class="hero-tag">Clinical Reasoning</span>
+        </div>
+        <div class="hero-cta">
+          <button class="btn btn-primary" onclick="navigate('archive')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Browse Cases
+          </button>
+          <a class="btn btn-secondary" href="https://rehabarchitect.github.io/rehabarchitect.com/" target="_blank">
+            ← Back to Portfolio
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-visual-label">Platform at a glance</div>
+        <div class="stat-row" id="hero-stats">
+          <div class="stat-item">
+            <div class="stat-icon" style="background:rgba(45,90,142,0.1)">📋</div>
+            <div>
+              <div class="stat-num" id="stat-cases">—</div>
+              <div class="stat-desc">Clinical Cases</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="background:rgba(184,137,42,0.1)">🏷</div>
+            <div>
+              <div class="stat-num" id="stat-tags">—</div>
+              <div class="stat-desc">Topics Covered</div>
+            </div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-icon" style="background:rgba(45,107,74,0.1)">🧠</div>
+            <div>
+              <div class="stat-num">Neuro</div>
+              <div class="stat-desc">Primary Speciality</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-disclaimer">
+          ⚖ All cases are anonymized. No identifiable patient information. For educational purposes only.
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="section-wrap">
+      <div class="section-header">
+        <h2 class="section-title">Browse by Topic</h2>
+      </div>
+      <div class="category-grid" id="category-grid">
+        <!-- JS generated -->
+      </div>
+    </div>
+
+    <!-- Recent cases -->
+    <div class="section-wrap">
+      <div class="section-header">
+        <h2 class="section-title">Recent Cases</h2>
+        <a class="section-link" href="#" onclick="navigate('archive')">VIEW ALL →</a>
+      </div>
+      <div class="case-grid" id="recent-cases-grid">
+        <!-- JS generated -->
+      </div>
+    </div>
+
+    <!-- About -->
+    <div class="section-wrap" id="about-section">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;padding:40px 0;border-top:1px solid var(--border)">
+        <div>
+          <div class="hero-eyebrow" style="margin-bottom:16px">About This Platform</div>
+          <h2 class="section-title" style="font-family:var(--serif);font-size:28px;margin-bottom:20px">
+            Built by a clinician,<br>for clinicians.
+          </h2>
+          <p style="font-size:14px;color:var(--text2);line-height:1.85;margin-bottom:16px">
+            This platform exists to document clinical reasoning in neurological physiotherapy — not as finished answers, but as honest reflections from daily practice.
+          </p>
+          <p style="font-size:14px;color:var(--text2);line-height:1.85;margin-bottom:24px">
+            Every case shared here has been anonymized. The goal is not to present exemplary outcomes, but to think out loud about the complexity of rehabilitation decisions.
+          </p>
+          <a class="btn btn-secondary" href="https://rehabarchitect.github.io/rehabarchitect.com/" target="_blank" style="display:inline-flex">
+            Visit Full Portfolio →
+          </a>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text3);margin-bottom:6px">SPECIALITY</div>
+            <div style="font-size:14px;color:var(--text)">Neurological · Cardiopulmonary · Geriatric Rehabilitation</div>
+          </div>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text3);margin-bottom:6px">ROBOTIC EXPERTISE</div>
+            <div style="font-size:14px;color:var(--text)">EksoNR · HIWIN · R-GAIT Systems</div>
+          </div>
+          <div style="background:rgba(184,137,42,0.07);border:1px solid rgba(184,137,42,0.2);border-radius:var(--radius);padding:18px 20px">
+            <div style="font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--gold);margin-bottom:8px">⚖ DISCLAIMER</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7">All cases are anonymized. No identifiable patient information is included. Content is for educational purposes only and does not constitute clinical guidelines or treatment protocols.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /view-home -->
+
+  <!-- ── ARCHIVE VIEW ── -->
+  <div class="view" id="view-archive">
+    <div class="archive-layout">
+
+      <!-- Sidebar -->
+      <aside class="archive-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Category</div>
+          <div id="sidebar-categories"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Tags</div>
+          <div class="tag-cloud" id="sidebar-tags"></div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main>
+        <div class="archive-toolbar">
+          <span class="archive-count" id="archive-count">— cases</span>
+          <select class="archive-sort" onchange="sortCases(this.value)">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="title">Title A–Z</option>
+          </select>
+        </div>
+        <div class="case-list" id="archive-list">
+          <!-- JS generated -->
+        </div>
+      </main>
+    </div>
+  </div><!-- /view-archive -->
+
+  <!-- ── READER VIEW ── -->
+  <div class="view" id="view-reader">
+    <div class="reader-layout">
+      <article>
+        <div class="article-back" onclick="navigate('archive')">← Back to Archive</div>
+        <div class="disclaimer-banner">
+          <div class="disclaimer-icon">⚖</div>
+          <div class="disclaimer-text">
+            This case is anonymized. No identifiable patient information is included. Content is shared for educational and professional reflection purposes only. This is not a clinical guideline or treatment protocol.
+          </div>
+        </div>
+        <div class="article-header" id="article-header"></div>
+        <div class="md-body" id="article-body"></div>
+        <div id="collapsible-sections"></div>
+        <div id="references-section"></div>
+      </article>
+
+      <!-- TOC -->
+      <aside>
+        <div class="toc-sidebar">
+          <div class="toc-label">Contents</div>
+          <ul class="toc-list" id="toc-list"></ul>
+          <div class="toc-progress">
+            <span id="toc-percent">0%</span> read
+            <div class="toc-progress-bar">
+              <div class="toc-progress-fill" id="toc-fill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div><!-- /view-reader -->
+
+</div><!-- /app -->
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="footer-brand">RehabArchitect</div>
+  <div class="footer-note">
+    Anonymous clinical case sharing · Educational use only<br>
+    No identifiable patient information
+  </div>
+  <a class="footer-link" href="https://rehabarchitect.github.io/rehabarchitect.com/" target="_blank">← Portfolio</a>
+</footer>
+
+<!-- ── Image Modal ── -->
+<div class="img-modal" id="img-modal" onclick="closeModal()">
+  <img id="modal-img" src="" alt="">
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+
+/* ── CONFIG: list your .md files here ── */
+const CASES = [
+  {
+    id: 'case1',
+    file: 'data/case1.md',
+    title: 'Equinovarus Gait with DKES Intervention — Stroke Rehabilitation',
+    excerpt: 'Clinical reasoning behind elastic sling application in a patient presenting with moderate plantar flexor spasticity and knee hyperextension tendency post-stroke.',
+    tags: ['stroke', 'spasticity', 'gait', 'dkes'],
+    category: 'Clinical Case',
+    date: '2025-05',
+    readTime: '8 min',
+    lang: 'en'
+  },
+  {
+    id: 'case2',
+    file: 'data/case2.md',
+    title: 'Incomplete SCI — RAGT Readiness Assessment and EksoNR Progression',
+    excerpt: 'Systematic approach to robotic gait training readiness assessment and session progression in a patient with cervical incomplete spinal cord injury (ASIA C).',
+    tags: ['sci', 'robotic', 'ragt', 'eksonr'],
+    category: 'Robotic Rehab',
+    date: '2025-04',
+    readTime: '10 min',
+    lang: 'en'
+  },
+  {
+    id: 'case3',
+    file: 'data/case3.md',
+    title: 'TBI Rehabilitation — Motor Recovery and Cognitive Interaction',
+    excerpt: 'Reflections on managing motor recovery in a patient with moderate TBI, with particular attention to the interaction between cognitive load and gait quality.',
+    tags: ['tbi', 'gait', 'motor-recovery'],
+    category: 'Clinical Reasoning',
+    date: '2025-03',
+    readTime: '7 min',
+    lang: 'en'
+  }
+];
+
+const CATEGORIES = [
+  { name: 'Clinical Case',      icon: '📋', filter: 'Clinical Case' },
+  { name: 'Robotic Rehab',      icon: '🦾', filter: 'Robotic Rehab' },
+  { name: 'Clinical Reasoning', icon: '🧠', filter: 'Clinical Reasoning' },
+  { name: 'Innovation Concept', icon: '💡', filter: 'Innovation Concept' },
+];
+
+/* ── STATE ── */
+let currentView = 'home';
+let activeCategory = null;
+let activeTag = null;
+let searchQuery = '';
+let sortMode = 'newest';
+let currentCase = null;
+
+/* ── NAVIGATION ── */
+function navigate(view) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  currentView = view;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  if (view === 'archive') renderArchive();
+  if (view === 'home')    renderHome();
+}
+
+function openCase(id) {
+  currentCase = CASES.find(c => c.id === id);
+  if (!currentCase) return;
+  navigate('reader');
+  loadCaseContent(currentCase);
+}
+
+/* ── THEME ── */
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  updateThemeIcon(!isDark);
+}
+
+function updateThemeIcon(isDark) {
+  const icon = document.getElementById('theme-icon');
+  icon.innerHTML = isDark
+    ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'
+    : '<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>';
+}
+
+/* ── SEARCH ── */
+function handleSearch(q) {
+  searchQuery = q.toLowerCase();
+  if (currentView === 'archive') renderArchive();
+}
+
+/* ── MOBILE MENU ── */
+function toggleMobileMenu() {
+  document.getElementById('mobile-sidebar').classList.toggle('open');
+  document.getElementById('mobile-overlay').classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-sidebar').classList.remove('open');
+  document.getElementById('mobile-overlay').classList.remove('open');
+}
+
+/* ── PROGRESS BAR (scroll) ── */
+window.addEventListener('scroll', () => {
+  const scrolled = window.scrollY;
+  const total = document.body.scrollHeight - window.innerHeight;
+  const pct = total > 0 ? (scrolled / total * 100) : 0;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // TOC progress
+  const fill = document.getElementById('toc-fill');
+  const pctEl = document.getElementById('toc-percent');
+  if (fill) { fill.style.width = pct + '%'; pctEl.textContent = Math.round(pct) + '%'; }
+
+  // Active TOC item
+  updateActiveToc();
+});
+
+/* ── HOME RENDER ── */
+function renderHome() {
+  // Stats
+  const allTags = new Set(CASES.flatMap(c => c.tags));
+  document.getElementById('stat-cases').textContent = CASES.length;
+  document.getElementById('stat-tags').textContent = allTags.size;
+
+  // Categories
+  const catGrid = document.getElementById('category-grid');
+  catGrid.innerHTML = CATEGORIES.map(cat => {
+    const count = CASES.filter(c => c.category === cat.filter).length;
+    return `
+      <div class="cat-card" onclick="filterByCategory('${cat.filter}')">
+        <div class="cat-icon">${cat.icon}</div>
+        <div class="cat-name">${cat.name}</div>
+        <div class="cat-count">${count} case${count !== 1 ? 's' : ''}</div>
+      </div>`;
+  }).join('');
+
+  // Recent 3
+  const recent = [...CASES].sort((a,b) => b.date.localeCompare(a.date)).slice(0,3);
+  document.getElementById('recent-cases-grid').innerHTML = recent.map(renderCaseCard).join('');
+}
+
+function filterByCategory(cat) {
+  activeCategory = cat; activeTag = null;
+  navigate('archive');
+}
+
+function renderCaseCard(c) {
+  return `
+    <div class="case-card" onclick="openCase('${c.id}')">
+      <div class="case-card-top"></div>
+      <div class="case-card-body">
+        <div class="case-meta">
+          ${c.tags.slice(0,2).map(t => `<span class="tag ${t}">${t}</span>`).join('')}
+          <span class="case-date">${c.date}</span>
+        </div>
+        <h3 class="case-title">${c.title}</h3>
+        <p class="case-excerpt">${c.excerpt}</p>
+      </div>
+      <div class="case-card-footer">
+        <span class="read-time">⏱ ${c.readTime}</span>
+        <span class="read-arrow">→</span>
+      </div>
+    </div>`;
+}
+
+/* ── ARCHIVE RENDER ── */
+function renderArchive() {
+  let cases = [...CASES];
+
+  // Filter
+  if (activeCategory) cases = cases.filter(c => c.category === activeCategory);
+  if (activeTag)      cases = cases.filter(c => c.tags.includes(activeTag));
+  if (searchQuery)    cases = cases.filter(c =>
+    c.title.toLowerCase().includes(searchQuery) ||
+    c.excerpt.toLowerCase().includes(searchQuery) ||
+    c.tags.some(t => t.includes(searchQuery))
+  );
+
+  // Sort
+  if (sortMode === 'newest') cases.sort((a,b) => b.date.localeCompare(a.date));
+  if (sortMode === 'oldest') cases.sort((a,b) => a.date.localeCompare(b.date));
+  if (sortMode === 'title')  cases.sort((a,b) => a.title.localeCompare(b.title));
+
+  document.getElementById('archive-count').textContent = `${cases.length} case${cases.length!==1?'s':''}`;
+
+  // List
+  const list = document.getElementById('archive-list');
+  if (cases.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔍</div>No cases found.</div>`;
+  } else {
+    list.innerHTML = cases.map(c => `
+      <div class="case-list-item" onclick="openCase('${c.id}')">
+        <div class="case-list-accent"></div>
+        <div class="case-list-content">
+          <div class="case-list-meta" style="margin-bottom:8px">
+            ${c.tags.map(t => `<span class="tag ${t}">${t}</span>`).join('')}
+            <span class="case-date" style="margin-left:auto">${c.date} · ${c.readTime}</span>
+          </div>
+          <h3 class="case-list-title">${highlight(c.title, searchQuery)}</h3>
+          <p class="case-list-excerpt">${highlight(c.excerpt, searchQuery)}</p>
+        </div>
+      </div>`).join('');
+  }
+
+  // Sidebar cats
+  const catEl = document.getElementById('sidebar-categories');
+  catEl.innerHTML = `
+    <button class="sidebar-filter-btn ${!activeCategory?'active':''}" onclick="setSidebarCat(null)">
+      All Categories <span class="filter-count">${CASES.length}</span>
+    </button>
+    ${CATEGORIES.map(cat => {
+      const count = CASES.filter(c => c.category === cat.filter).length;
+      return `<button class="sidebar-filter-btn ${activeCategory===cat.filter?'active':''}"
+        onclick="setSidebarCat('${cat.filter}')">
+        ${cat.icon} ${cat.name} <span class="filter-count">${count}</span>
+      </button>`;
+    }).join('')}`;
+
+  // Sidebar tags
+  const allTags = [...new Set(CASES.flatMap(c => c.tags))];
+  document.getElementById('sidebar-tags').innerHTML = allTags.map(t =>
+    `<button class="tag-btn ${activeTag===t?'active':''}" onclick="setSidebarTag('${t}')">${t}</button>`
+  ).join('');
+}
+
+function setSidebarCat(cat) { activeCategory = cat; renderArchive(); }
+function setSidebarTag(tag) { activeTag = activeTag === tag ? null : tag; renderArchive(); }
+function sortCases(val)      { sortMode = val; renderArchive(); }
+
+/* ── CASE READER ── */
+async function loadCaseContent(c) {
+  const header = document.getElementById('article-header');
+  const body   = document.getElementById('article-body');
+  const toc    = document.getElementById('toc-list');
+  const collSections = document.getElementById('collapsible-sections');
+  const refs   = document.getElementById('references-section');
+
+  // Reset
+  body.innerHTML = '<div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton skeleton-text" style="width:80%"></div>';
+  header.innerHTML = '';
+  toc.innerHTML = '';
+  collSections.innerHTML = '';
+  refs.innerHTML = '';
+
+  // Header
+  header.innerHTML = `
+    <div class="article-meta">
+      ${c.tags.map(t => `<span class="tag ${t}">${t}</span>`).join('')}
+      <span class="case-date">${c.date} · ${c.readTime}</span>
+    </div>
+    <h1 class="article-title">${c.title}</h1>
+    <p class="article-desc">${c.excerpt}</p>
+    <div class="article-divider"></div>`;
+
+  // Load markdown
+  try {
+    const res = await fetch(c.file);
+    if (!res.ok) throw new Error('Not found');
+    const md = await res.text();
+
+    // Parse and inject
+    body.style.opacity = '0';
+    body.innerHTML = marked.parse(md);
+    body.style.transition = 'opacity 0.4s';
+    requestAnimationFrame(() => { body.style.opacity = '1'; });
+
+    // Image modal
+    body.querySelectorAll('img').forEach(img => {
+      img.addEventListener('click', () => openModal(img.src));
+    });
+
+    // Build TOC
+    buildTOC(body, toc);
+
+    // Add collapsible sections
+    buildCollapsibles(collSections);
+
+  } catch (e) {
+    body.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📄</div>
+        <p>Content file not found: <code>${c.file}</code></p>
+        <p style="margin-top:8px;font-size:11px;">Create this file in your /data folder to display content here.</p>
+      </div>`;
+  }
+}
+
+/* ── TOC BUILDER ── */
+function buildTOC(container, tocEl) {
+  const headings = container.querySelectorAll('h1, h2, h3');
+  if (headings.length === 0) { tocEl.innerHTML = '<li style="font-size:11px;color:var(--text3);padding-left:12px">No headings found</li>'; return; }
+
+  headings.forEach((h, i) => {
+    const id = 'heading-' + i;
+    h.setAttribute('id', id);
+    const li = document.createElement('li');
+    li.className = 'toc-item' + (h.tagName === 'H3' ? ' toc-h3' : '');
+    li.textContent = h.textContent;
+    li.dataset.target = id;
+    li.addEventListener('click', () => {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    tocEl.appendChild(li);
+  });
+}
+
+function updateActiveToc() {
+  const items = document.querySelectorAll('.toc-item');
+  items.forEach(item => {
+    const target = document.getElementById(item.dataset.target);
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    if (rect.top >= 0 && rect.top < 200) {
+      items.forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+    }
+  });
+}
+
+/* ── COLLAPSIBLE SECTIONS ── */
+const CLINICAL_SECTIONS = [
+  { key: 'Clinical Context',      icon: '🏥', color: 'rgba(45,90,142,0.08)' },
+  { key: 'Problem Analysis',      icon: '🔍', color: 'rgba(142,45,45,0.08)' },
+  { key: 'Intervention',          icon: '🛠', color: 'rgba(45,107,74,0.08)' },
+  { key: 'Clinical Reasoning',    icon: '🧠', color: 'rgba(184,137,42,0.08)' },
+  { key: 'Observation',           icon: '👁', color: 'rgba(45,90,142,0.08)' },
+  { key: 'Reflection',            icon: '💭', color: 'rgba(100,60,140,0.08)' },
+  { key: 'Evidence Consideration',icon: '📚', color: 'rgba(45,107,74,0.08)' },
+  { key: 'Limitations',           icon: '⚠️', color: 'rgba(142,45,45,0.08)' },
+];
+
+function buildCollapsibles(container) {
+  // Only render if article body has no content (fallback structured view)
+  // Otherwise collapsibles are already in the markdown
+  if (document.getElementById('article-body').children.length > 2) return;
+
+  container.innerHTML = `
+    <div style="margin-top:32px">
+      <h2 style="font-family:var(--serif);font-size:20px;color:var(--text);margin-bottom:16px">Clinical Structure</h2>
+      ${CLINICAL_SECTIONS.map((s, i) => `
+        <div class="collapsible-section" id="coll-${i}">
+          <div class="collapsible-header" onclick="toggleCollapsible('coll-${i}')">
+            <div class="collapsible-title">
+              <div class="collapsible-icon" style="background:${s.color}">${s.icon}</div>
+              ${s.key}
+            </div>
+            <span class="collapsible-chevron">▾</span>
+          </div>
+          <div class="collapsible-body">
+            <p style="color:var(--text3);font-family:var(--mono);font-size:11px;letter-spacing:1px">
+              Content not yet added to this section.
+            </p>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function toggleCollapsible(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ── IMAGE MODAL ── */
+function openModal(src) {
+  document.getElementById('modal-img').src = src;
+  document.getElementById('img-modal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('img-modal').classList.remove('open');
+}
+
+/* ── SCROLL TO ABOUT ── */
+function scrollToAbout() {
+  setTimeout(() => {
+    const el = document.getElementById('about-section');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+/* ── SEARCH HIGHLIGHT ── */
+function highlight(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(`(${escaped})`, 'gi'),
+    '<mark style="background:rgba(184,137,42,0.25);border-radius:2px;padding:0 2px">$1</mark>');
+}
+
+/* ── INIT ── */
+function init() {
+  // Restore theme
+  const saved = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', saved);
+  updateThemeIcon(saved === 'dark');
+
+  // Configure marked options
+  marked.setOptions({ breaks: true, gfm: true });
+
+  // Render home
+  renderHome();
+}
+
+init();
+</script>
+</body>
+</html>
